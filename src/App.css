@@ -1,0 +1,38 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  row-gap: 7px;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: rgb(74,87,91);
+  background: linear-gradient(45deg, rgba(74,87,91,1) 4%, rgba(210,148,148,0.7231267507002801) 34%, rgba(255,0,0,1) 89%);
+}
+.title_app{
+  position: fixed;
+  top: 10vh;
+  font-size: calc(1em + 2vw);
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-weight: bolder;
+}
+.panel_notif{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  width: 150px;
+  height: 100px;
+}
+.blanco{
+  background-color: white;
+}
+.rojo{
+  background-color: red;
+}
+.verde{
+  background-color: green;
+}
+
+.fa:hover{
+  cursor: pointer;
+}
