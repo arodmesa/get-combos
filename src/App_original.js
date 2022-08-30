@@ -72,7 +72,7 @@ function App() {
         'X-Requested-With': 'XMLHttpRequest',
       }
     }
-    axios.get('https://api.tuenvio.cu/captcha/refresh/', config)
+    axios.get('captcha/refresh/', config)
     .then(res=> {
       setCaptchaKey(res.data.key);
       setUrlCaptcha(res.data.image_url);
@@ -107,7 +107,7 @@ function App() {
           "query": "query Provinces {\n  provinces {\n    id\n    name\n    __typename\n  }\n}\n"
       }
     ]
-    axios.post('https://api.tuenvio.cu/graphql/', data, config)
+    axios.post('graphql/', data, config)
     .then(res => {
       if (res.data[0].data.tokenCreate.token){
         setToken(res.data[0].data.tokenCreate.token);
@@ -165,7 +165,7 @@ function App() {
       }
     ]
     console.log('Busqueda !!!!!!')
-    axios.post('https://api.tuenvio.cu/graphql/', data, config)
+    axios.post('graphql/', data, config)
     .then(res => {
       if (res.data[0].data.products.totalCount>0){
         setHayCombo(true);
@@ -222,7 +222,7 @@ function App() {
         )        
       })
       for (let i=0; i<data.length; i++){
-        axios.post('https://api.tuenvio.cu/graphql/', data[i], config)
+        axios.post('graphql/', data[i], config)
         .then(res => {
          if(res.data[0].data.productReservationCart.reservation){
           alert('Producto agregado!!! Se detiene el agregado automático');
