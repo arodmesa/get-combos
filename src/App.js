@@ -76,7 +76,7 @@ function App() {
     axios.get('https://api.tuenvio.cu/captcha/refresh/', config)
     .then(res=> {
       setCaptchaKey(res.data.key);
-      setUrlCaptcha(res.data.image_url);
+      setUrlCaptcha(`https://api.tuenvio.cu${res.data.image_url}`);
     })
     .catch(err=> console.log(err))
   }
