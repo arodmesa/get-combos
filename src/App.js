@@ -18,6 +18,7 @@ function App() {
   const [token, setToken]= useState('');
   const [provID, setProvID]= useState('');
   const [prov_select, setProvSelect]= useState('Cienfuegos');
+  const [all_provinces, setAllProvinces]= useState();
   const [hayCombo, setHayCombo]= useState(false);
   const [idCombo, setIdCombo]= useState([]);
   const [comboName, setComboName]= useState('')
@@ -25,7 +26,7 @@ function App() {
   const [myInterval, setMyInterval]= useState(0);
   const [codigo_resp, setCodResp] =useState('');
   const [color_panel, setColorPanel]= useState('blanco');
-
+  const [error_agregado, setErrorAgregado] = useState('');
   let funcEstados={
     user: setUser,
     password: setPassword,
@@ -61,8 +62,11 @@ function App() {
   function changeDatos(event, name){
     funcEstados[name](event.target.value);
   }
-  function cambiarProv(event){
+  function cambiarProv(event, cambiarEstados=false){
     setProvSelect(event.target.value);
+    if (cambiarEstados){
+      setProvID(all_provinces.filter(prov => prov.name===event.target.value)[0].id)
+    }
   }
 
   function getCaptcha(){
@@ -112,6 +116,9 @@ function App() {
     .then(res => {
       if (res.data[0].data.tokenCreate.token){
         setToken(res.data[0].data.tokenCreate.token);
+        localStorage.setItem('jwt',res.data[0].data.tokenCreate.token);
+        setAllProvinces(res.data[2].data.provinces);
+        localStorage.setItem('all_provinces',JSON.stringify(res.data[2].data.provinces));
         setProvID(res.data[2].data.provinces.filter(prov => prov.name===prov_select)[0].id)// id de la provincia seleccionada
         console.log(res.data[2].data.provinces.filter(prov => prov.name===prov_select)[0].id);
         setAutenticado(true);
@@ -130,7 +137,7 @@ function App() {
     }
     setBusquedaActiva(bool_var);
     if (bool_var){
-      let miliseg=800;
+      let miliseg=600;
       let temp_interval = setInterval(postCombo, miliseg);
       setMyInterval(temp_interval);
       localStorage.setItem('interval',temp_interval);
@@ -168,16 +175,28 @@ function App() {
     console.log('Busqueda !!!!!!')
     axios.post('https://api.tuenvio.cu/graphql/', data, config)
     .then(res => {
-      if (res.data[0].data.products.totalCount>0){
+      if (res.data[0].errors && res.data[0].errors[0].message==="Signature has expired"){
+        setToken('');
+        localStorage.setItem('jwt','');
+        setAllProvinces();
+        localStorage.setItem('all_provinces','');
+        setAutenticado(false);
+        setBusquedaActiva(false);
+        clearInterval((myInterval)?myInterval:localStorage.getItem('interval'));
+        source.cancel();
+        getCaptcha();
+      }
+      else if (res.data[0].data.products.totalCount>0){
         setHayCombo(true);
         let temp_combos=res.data[0].data.products.edges.map((elem)=>{
           return elem.node.id;
         }); //puede que sea otro id en res.data[0].data.products.edges[0].node.variants[0].id  
 
-        ////let temp_combos=['hisdfhkjdsghjfkhdjkfhs'];
-        ////setIdCombo(temp_combos); 
-        ////setComboName('prueba combo');   
+        //let temp_combos=['hisdfhkjdsghjfkhdjkfhs'];
+        //setIdCombo(temp_combos); 
+        //setComboName('prueba combo');   
 
+        setIdCombo(temp_combos);
         setComboName(res.data[0].data.products.edges[0].node.name);
         clearInterval((myInterval)?myInterval:localStorage.getItem('interval'));
         source.cancel();
@@ -186,7 +205,10 @@ function App() {
         respuesta(res.status);
       }   
     })
-    .catch(err => console.log(err))
+    .catch(err => {
+      console.log(err);
+      respuesta(err.status);
+    })
   }
   function respuesta(codigo){
     setTimeout(()=>{
@@ -194,7 +216,13 @@ function App() {
       setCodResp('');
     },1000)
     setColorPanel((codigo===200)?'verde':'rojo');
-    setCodResp(codigo);
+    setCodResp((codigo===200)?200:'Error');
+  }
+  function errorCart(str){
+    setTimeout(()=>{
+      setErrorAgregado('');
+    },1000)
+    setErrorAgregado(str);
   }
   function getInCart(temp_combos){
     let miliseg=200;
@@ -230,7 +258,8 @@ function App() {
           clearInterval((myInterval)?myInterval:localStorage.getItem('interval'));
          }
          else{
-          alert("Aparentemente el producto no ha podido ser agregado");
+          errorCart(res.data[0].data.productReservationCart.errors[0].message);
+          //alert("Aparentemente el producto no ha podido ser agregado");
          }
         })
         .catch(err => 
@@ -244,21 +273,45 @@ function App() {
   function detenerGetInCart(){
     clearInterval((myInterval)?myInterval:localStorage.getItem('interval'));
   }
-
+  function startAddingProduct(){
+    getInCart(idCombo);
+  }
+  function logOut(){
+    setToken('');
+    localStorage.setItem('jwt','');
+    setAllProvinces();
+    localStorage.setItem('all_provinces','');
+    setAutenticado(false);
+    setBusquedaActiva(false);
+    try{
+      clearInterval((myInterval)?myInterval:localStorage.getItem('interval'));
+      source.cancel();        
+    }catch{}
+    getCaptcha();
+  }
   useEffect(()=>{
     //getHtml('https://tienda.tuenvio.cu/login/');
-    getCaptcha();
+    if (localStorage.getItem('jwt')){
+      setAutenticado(true);
+      setToken(localStorage.getItem('jwt'));
+      let temp_prov=JSON.parse(localStorage.getItem('all_provinces'));
+      setAllProvinces(temp_prov);      
+      setProvID(temp_prov.filter(prov => prov.name===prov_select)[0].id)// id de la provincia seleccionada      
+    }else{
+      getCaptcha();
+    }    
   },[])  
   /////////////////////
   return (
     <div className="App">
-      <h1 className='title_app'>Cogedor de combos 1.0</h1>
+      <h1 className='title_app'>Cogedor de combos 2.0</h1>
       { (autenticado)?
         <>
-          <GetCombos hayCombo={hayCombo} busqueda_activa={busqueda_activa} startLooking={startLooking} comboName={comboName} detenerGetInCart={detenerGetInCart} />
-          <div className={`panel_notif ${color_panel}`}>
-            <h1 className={'cod'}>{codigo_resp}</h1>
-          </div>
+          <GetCombos prov_select={prov_select} provincias={provincias} cambiarProv={cambiarProv} hayCombo={hayCombo} busqueda_activa={busqueda_activa} startLooking={startLooking} comboName={comboName} detenerGetInCart={detenerGetInCart} startAddingProduct={startAddingProduct} />
+          <div className={(hayCombo)?'panel_error':`panel_notif ${color_panel}`}>
+            {(hayCombo)?<p className='msj_agregado'>{error_agregado}</p>:<h1 className={'cod'}>{codigo_resp}</h1>}
+          </div>  
+          <button className='btn_logOut' onClick={logOut}>Log Out</button>        
         </>
        :
        <LogIn 
