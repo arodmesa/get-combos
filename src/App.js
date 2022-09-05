@@ -309,7 +309,7 @@ function App() {
         <>
           <GetCombos prov_select={prov_select} provincias={provincias} cambiarProv={cambiarProv} hayCombo={hayCombo} busqueda_activa={busqueda_activa} startLooking={startLooking} comboName={comboName} detenerGetInCart={detenerGetInCart} startAddingProduct={startAddingProduct} />
           <div className={(hayCombo)?'panel_error':`panel_notif ${color_panel}`}>
-            {(hayCombo)?<p className='msj_agregado'>{error_agregado}</p>:<h1 className={'cod'}>{codigo_resp}</h1>}
+            {(hayCombo)?<p className='msj_agregado'>{error_agregado}</p>:<h1 className='cod'>{codigo_resp}</h1>}
           </div>  
           <button className='btn_logOut' onClick={logOut}>Log Out</button>        
         </>
