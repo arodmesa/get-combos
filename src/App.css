@@ -19,7 +19,7 @@
   justify-content: center;
   border-radius: 15px;
   width: 150px;
-  height: 100px;
+  height: 50px;
 }
 .blanco{
   background-color: white;
@@ -34,7 +34,7 @@
   text-align: center;
   background-color: rgb(174, 186, 186);
   min-width: 250px;
-  height: 100px;
+  height: 50px;
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -52,6 +52,9 @@
   background-color: rgba(255, 0, 0, 0.897);
   border-radius: 15px;
   color: rgba(255, 255, 255);
+}
+.cod{
+  font-size: calc(1em + 0.5vw);
 }
 .fa:hover{
   cursor: pointer;
